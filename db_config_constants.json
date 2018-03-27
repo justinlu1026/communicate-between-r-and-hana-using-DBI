@@ -1,0 +1,1 @@
+{"DRIVER_CLASS":["com.sap.db.jdbc.Driver"],"CLASS_PATH":{"Windows":["C:/Program Files/sap/hdbclient/ngdbc.jar"],"macOS":["randomwords"]},"SERVER_URL":{"BHP":["jdbc:sap://syd1sap71:30015/?autocommit=false"],"HEP":["jdbc:sap://syd1sap78:30041/?autocommit=false"]}}

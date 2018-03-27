@@ -1,0 +1,64 @@
+---
+title: "Connect R to Hana using DBI"
+output: html_notebook
+---
+
+The purpose of the notebook is to demonstrate how to facilitate communication between R and Hana using DBI package 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r connect to DB}
+## Load libraries
+library(RJDBC)
+
+## Modify max heap size of JVM
+options(java.parameters = "-Xmx20g")
+
+## specify the db for connection
+db_name = "HEP"
+
+## Load login json config files
+db_config_constants <- jsonlite::read_json("./db_config_constants.json") 
+db_config_user <- jsonlite::read_json("./db_config_user.json") 
+
+conn <- dbConnect(
+  JDBC(driverClass = db_config_constants$DRIVER_CLASS[[1]], 
+       classPath = db_config_constants$CLASS_PATH[[Sys.info()[["sysname"]]]][[1]]),
+  db_config_constants$SERVER_URL[[db_name]][[1]],
+  db_config_user[[db_name]][["user_id"]][[1]],
+  db_config_user[[db_name]][["login_password"]][[1]]
+)
+
+
+
+```
+
+
+```{r}
+tbl <- Id(schema = "TA", table = "MTCARS_TEST")
+dbWriteTable(conn, "MTCARS_TEST", mtcars)
+dbWriteTable()
+dbExistsTable(conn, tbl)
+dbGetQuery(conn, "select * from ta.mtcars")
+dbReadTable(conn, "MTCARS_TEST_4")
+dbDataType(conn, list(raw(10)))
+
+dbWriteTable(conn, "CARS", head(cars, 3))
+dbReadTable(conn, "CARS")
+try(dbExecute(conn,
+'INSERT INTO CARS (speed, dist) VALUES (1, 1);'), silent = TRUE)
+try(dbExecute(conn,
+'INSERT INTO TA.CARS (speed, dist) VALUES (1, 1);'), silent = TRUE)
+dbReadTable(conn, "CARS")
+
+dbExistsTable(conn, "MTCARS_TEST")
+
+
+rs <- dbSendQuery(conn, "select * from ta.tmp_a")
+dbGetStatement(rs)
+
+sqlCreateTable(conn, "MTCARS_SKELETON", mtcars)
+dbCommit(conn)
+
+```
+
